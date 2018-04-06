@@ -48,6 +48,7 @@ function movieThis() {
 
 		//  the body output from the api request is a string that will be returned from the api in a JSON format. the code on line 50 is grabbing the string and 'parseing' it to the body object so that we can view it in the correct format.
 		if (!error && response.statusCode === 200) {
+			console.log(('=============== LOG ENTRY BEGIN ===============\r\n'));
 			var jsonBody = JSON.parse(body);
 			console.log(error);
 			console.log("\r\n Title: " + jsonBody.Title);
@@ -58,6 +59,7 @@ function movieThis() {
 			console.log("\r\n Language: " + jsonBody.Language);
 			console.log("\r\n Plot: " + jsonBody.Plot);
 			console.log("\r\n Strarring: " + jsonBody.Actors);
+			console.log(('=============== LOG ENTRY END ===============\r\n \r\n'))
 		}
 	});
 
@@ -85,8 +87,9 @@ function spotifySong(action) {
 			'Preview Link': song.preview_url,
 			'Album': song.album.name
 		}
-
+		console.log(('=============== LOG ENTRY BEGIN ===============\r\n'));
 		console.log(JSON.stringify(printsong, null, 2));
+		console.log(('=============== LOG ENTRY END ===============\r\n \r\n'))
 	});
 }
 
