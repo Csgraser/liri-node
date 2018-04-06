@@ -5,6 +5,7 @@ var fs = require('fs')
 var Twitter = require('twitter');
 var request = require('request');
 var imdb = require('imdb-api');
+var Spotify = require('node-spotify-api');
 var client = new Twitter(keys.twitter);
 var params = {
 	screen_name: "VokeVideos", count: 20
@@ -17,7 +18,7 @@ switch (command) {
 		result = myTweets();
 		break;
 	case "spotify-this-song":
-		result = spotifySong();
+		result = spotifySong(action);
 		break;
 	case "movie-this":
 		result = movieThis();
@@ -43,33 +44,64 @@ function myTweets() {
 
 
 function movieThis() {
-	request("http://www.omdbapi.com/?t=remember+the+titans&y=&plot=short&apikey=trilogy", function(error, response, body) {
-		
-		// If the request is successful (i.e. if the response status code is 200)
-		if (!error && response.statusCode === 200) {
-			imdb.get(action);
-			imdb.search({
-				title: action
-			})
+	request("http://www.omdbapi.com/?&t=" + action + "&y=&plot=short&apikey=trilogy", function (error, response, body) {
 
-			console.log();
+		//  the body output from the api request is a string that will be returned from the api in a JSON format. the code on line 50 is grabbing the string and 'parseing' it to the body object so that we can view it in the correct format.
+		if (!error && response.statusCode === 200) {
+			var jsonBody = JSON.parse(body);
+			console.log(error);
+			console.log("\r\n Title: " + jsonBody.Title);
+			console.log("\r\n Year: " + jsonBody.Year);
+			console.log("\r\n Rating: " + jsonBody.imdbRating);
+			console.log("\r\n Rotten Tomatoes Rating: " + jsonBody.Ratings[1].Value);
+			console.log("\r\n Country: " + jsonBody.Country);
+			console.log("\r\n Language: " + jsonBody.Language);
+			console.log("\r\n Plot: " + jsonBody.Plot);
+			console.log("\r\n Strarring: " + jsonBody.Actors);
 		}
 	});
-	
-	
+
+
 }
 
-
-
-
-
-
-function spotifySong() {
-	request('https://api.spotify.com/v1/search?q=' + title + '&type=track', function (error, response, body) {
-			// If the request is successful (i.e. if the response status code is 200)
-		if (!error && response.statusCode === 200) {
-
-		}
+function spotifySong(action) {
+	if (action == null) {
+		action = 'Steel and Silver';
+	}
+	var spotify = new Spotify({
+		id: keys.spotify.id,
+		secret: keys.spotify.secret
 	});
 
-};
+	spotify.search({ type: 'track', query: action }, function (err, data) {
+		if (err) {
+			return console.log('Error occurred: ' + err);
+		}
+		var song = data.tracks.items[0];
+
+		var printsong = {
+			'Artist(s)': song.artists[0].name,
+			'Name': song.name,
+			'Preview Link': song.preview_url,
+			'Album': song.album.name
+		}
+
+		console.log(JSON.stringify(printsong, null, 2));
+	});
+}
+
+function whatItSays() {
+	fs.readFile('random.txt', 'utf8', function (error, data) {
+		if (error) {
+			console.log(error);
+		} else {
+			var dataArr = data.split(',');
+			if (dataArr[0] === 'spotify') {
+				spotifySong(dataArr[1]);
+			}
+			if (dataArr[0] === 'omdb') {
+				movieThis(dataArr[1]);
+			}
+		}
+	});
+} 
